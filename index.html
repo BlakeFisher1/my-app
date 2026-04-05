@@ -36,7 +36,7 @@
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body, #root { height: 100%; margin: 0; padding: 0; }
-    body { font-family: 'DM Sans', sans-serif; background: #0a0f1e; color: #f1f5f9; line-height: 1.7; letter-spacing: 0.01em; overflow: hidden; }
+    body { font-family: 'DM Sans', sans-serif; background: #0a0f1e; color: #f1f5f9; line-height: 1.75; letter-spacing: 0.02em; overflow: hidden; font-size: 17px; }
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
@@ -64,34 +64,37 @@
     .box-breath-square { width: 120px; height: 120px; border: 3px solid #fbbf24; border-radius: 12px; position: relative; }
     .box-breath-dot { width: 14px; height: 14px; border-radius: 50%; background: #fbbf24; position: absolute; box-shadow: 0 0 12px rgba(251,191,36,0.6); }
 
-    .section-scroll { height: calc(100vh - 64px); overflow-y: auto; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
-    .nav-bar { height: 64px; }
+    .section-scroll { height: calc(100dvh - 80px); overflow-y: auto; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; padding-top: 20px; }
+    .nav-bar { height: 80px; }
 
-    .card { background: linear-gradient(135deg, #1a2236, #111827); border: 1px solid rgba(251,191,36,0.08); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .card { background: linear-gradient(135deg, #1a2236, #111827); border: 1px solid rgba(251,191,36,0.08); border-radius: 18px; padding: 22px 24px; margin-bottom: 14px; }
     .card:hover { border-color: rgba(251,191,36,0.15); }
 
-    .btn-primary { background: linear-gradient(135deg, #d97706, #f59e0b); color: #0a0f1e; font-weight: 700; border: none; border-radius: 12px; padding: 14px 28px; font-size: 1rem; cursor: pointer; transition: all 0.2s; min-height: 48px; font-family: 'Sora', sans-serif; }
+    .btn-primary { background: linear-gradient(135deg, #d97706, #f59e0b); color: #0a0f1e; font-weight: 700; border: none; border-radius: 14px; padding: 16px 30px; font-size: 1.05rem; cursor: pointer; transition: all 0.2s; min-height: 52px; font-family: 'Sora', sans-serif; }
     .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(245,158,11,0.3); }
     .btn-primary:active { transform: scale(0.97); }
 
-    .btn-secondary { background: rgba(251,191,36,0.1); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); border-radius: 12px; padding: 12px 24px; font-weight: 600; cursor: pointer; transition: all 0.2s; min-height: 48px; font-family: 'Sora', sans-serif; }
+    .btn-secondary { background: rgba(251,191,36,0.1); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); border-radius: 14px; padding: 14px 26px; font-weight: 600; cursor: pointer; transition: all 0.2s; min-height: 52px; font-family: 'Sora', sans-serif; font-size: 1rem; }
     .btn-secondary:hover { background: rgba(251,191,36,0.18); }
 
-    .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 16px; color: #f1f5f9; font-size: 1rem; width: 100%; font-family: 'DM Sans', sans-serif; line-height: 1.6; letter-spacing: 0.01em; min-height: 48px; }
+    .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 16px 18px; color: #f1f5f9; font-size: 1.05rem; width: 100%; font-family: 'DM Sans', sans-serif; line-height: 1.6; letter-spacing: 0.02em; min-height: 52px; }
     .input-field:focus { outline: none; border-color: rgba(251,191,36,0.4); box-shadow: 0 0 0 3px rgba(251,191,36,0.1); }
-    .input-field::placeholder { color: rgba(241,245,249,0.3); }
+    .input-field::placeholder { color: rgba(241,245,249,0.35); }
 
     .overlay-enter { animation: fadeIn 0.3s ease-out both; }
 
-    .toast { animation: toast-in 0.3s ease-out both; position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); z-index: 60; }
+    .toast { animation: toast-in 0.3s ease-out both; position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); z-index: 60; }
     .toast-exit { animation: toast-out 0.3s ease-out both; }
 
-    @media (min-width: 640px) {
-      .section-scroll { max-width: 480px; margin: 0 auto; }
-    }
+    /* Safe areas for Dynamic Island + bottom bar */
     @supports (padding-top: env(safe-area-inset-top)) {
-      .section-scroll { padding-top: calc(24px + env(safe-area-inset-top)); }
-      .nav-bar { padding-bottom: env(safe-area-inset-bottom); height: calc(64px + env(safe-area-inset-bottom)); }
+      .section-scroll { padding-top: calc(16px + env(safe-area-inset-top)); height: calc(100dvh - 80px - env(safe-area-inset-bottom)); }
+      .nav-bar { padding-bottom: env(safe-area-inset-bottom); height: calc(80px + env(safe-area-inset-bottom)); }
+      .toast { bottom: calc(100px + env(safe-area-inset-bottom)); }
+    }
+
+    @media (min-width: 640px) {
+      .section-scroll { max-width: 520px; margin: 0 auto; }
     }
   </style>
   <script>
@@ -297,7 +300,7 @@
       useEffect(() => { shuffle(); }, []);
 
       return (
-        <div className="section-scroll px-5 pt-6 pb-8">
+        <div className="section-scroll px-6 pt-6 pb-10">
           <div className="fade-in-up">
             <p className="text-amber-400 font-display font-semibold text-sm tracking-widest uppercase mb-2">Morning Armor</p>
             <h1 className="font-display font-extrabold text-3xl leading-tight mb-1" style={{color:'#fefce8'}}>Your Receipts</h1>
@@ -387,7 +390,7 @@
       if (sit) {
         const relevant = getRelevantReceipt(sit.id);
         return (
-          <div className="section-scroll px-5 pt-6 pb-8">
+          <div className="section-scroll px-6 pt-6 pb-10">
             <button onClick={() => setSelected(null)} className="flex items-center gap-2 text-amber-400 font-display font-semibold text-sm mb-6">
               <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/></svg>
               Back
@@ -425,7 +428,7 @@
 
       // Situation selection grid
       return (
-        <div className="section-scroll px-5 pt-6 pb-8">
+        <div className="section-scroll px-6 pt-6 pb-10">
           <div className="fade-in-up">
             <p className="text-amber-400 font-display font-semibold text-sm tracking-widest uppercase mb-2">Pre-Game</p>
             <h1 className="font-display font-extrabold text-3xl leading-tight mb-1" style={{color:'#fefce8'}}>Lock In</h1>
@@ -438,7 +441,7 @@
                 key={sit.id}
                 onClick={() => setSelected(sit.id)}
                 className="card w-full text-left flex items-center gap-4 fade-in-up"
-                style={{animationDelay:`${i*0.06}s`, cursor:'pointer', marginBottom:'12px'}}
+                style={{animationDelay:`${i*0.06}s`, cursor:'pointer', marginBottom:'12px', padding:'20px 22px', minHeight:'72px'}}
               >
                 <span className="text-3xl flex-shrink-0">{sit.emoji}</span>
                 <div className="flex-1 min-w-0">
@@ -485,7 +488,7 @@
       function doDelete() { setReceipts(prev => prev.filter(e => e.id !== deleteId)); setDeleteId(null); }
 
       return (
-        <div className="section-scroll px-5 pt-6 pb-8">
+        <div className="section-scroll px-6 pt-6 pb-10">
           <div className="fade-in-up">
             <p className="text-amber-400 font-display font-semibold text-sm tracking-widest uppercase mb-2">Wins</p>
             <h1 className="font-display font-extrabold text-3xl leading-tight mb-1" style={{color:'#fefce8'}}>Stack Your Proof</h1>
@@ -503,15 +506,15 @@
           {/* Quick Win buttons */}
           <div className="fade-in-up delay-1 mb-6">
             <p className="text-amber-400 font-display font-semibold text-xs tracking-widest uppercase mb-3">Quick Win \u2014 one tap</p>
-            <div className="flex flex-wrap gap-2">
+            <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px'}}>
               {QUICK_WIN_BUTTONS.map(btn => (
                 <button
                   key={btn.id}
                   onClick={() => quickWin(btn)}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl font-body text-sm font-medium transition-all active:scale-95"
-                  style={{background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', color:'#f1f5f9', minHeight:'44px'}}
+                  className="flex items-center gap-3 px-4 py-4 rounded-2xl font-body font-medium transition-all active:scale-95"
+                  style={{background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.1)', color:'#f1f5f9', minHeight:'56px', fontSize:'0.95rem', textAlign:'left'}}
                 >
-                  <span>{btn.emoji}</span>
+                  <span style={{fontSize:'1.3rem'}}>{btn.emoji}</span>
                   <span>{btn.label}</span>
                 </button>
               ))}
@@ -598,7 +601,7 @@
       const progress = (elapsed / totalDuration) * 100;
 
       return (
-        <div className="section-scroll px-5 pt-6 pb-8">
+        <div className="section-scroll px-6 pt-6 pb-10">
           <div className="fade-in-up">
             <p className="text-amber-400 font-display font-semibold text-sm tracking-widest uppercase mb-2">Courtroom Closer</p>
             <h1 className="font-display font-extrabold text-3xl leading-tight mb-1" style={{color:'#fefce8'}}>Shut It Down</h1>
@@ -646,7 +649,7 @@
       function handleKeyDown(e) { if (e.key === 'Enter') addEntry(); }
 
       return (
-        <div className="section-scroll px-5 pt-6 pb-8">
+        <div className="section-scroll px-6 pt-6 pb-10">
           <div className="fade-in-up">
             <p className="text-amber-400 font-display font-semibold text-sm tracking-widest uppercase mb-2">The Wall</p>
             <h1 className="font-display font-extrabold text-3xl leading-tight mb-1" style={{color:'#fefce8'}}>Nothing Bad Happened</h1>
@@ -756,7 +759,7 @@
     function QuickCalm() {
       const [showOverlay, setShowOverlay] = useState(false);
       return (
-        <div className="section-scroll px-5 pt-6 pb-8">
+        <div className="section-scroll px-6 pt-6 pb-10">
           <div className="fade-in-up">
             <p className="text-amber-400 font-display font-semibold text-sm tracking-widest uppercase mb-2">Quick Calm</p>
             <h1 className="font-display font-extrabold text-3xl leading-tight mb-1" style={{color:'#fefce8'}}>Ground Yourself</h1>
@@ -789,7 +792,7 @@
     // ── Nav Icon ──
     function NavIcon({ path, active }) {
       return (
-        <svg width="22" height="22" fill="none" stroke={active?'#fbbf24':'#f1f5f9'} strokeWidth="1.8" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" style={{opacity:active?1:0.35, transition:'all 0.2s'}}>
+        <svg width="26" height="26" fill="none" stroke={active?'#fbbf24':'#f1f5f9'} strokeWidth="1.8" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" style={{opacity:active?1:0.4, transition:'all 0.2s'}}>
           <path d={path} />
         </svg>
       );
@@ -832,11 +835,11 @@
             <div style={{animation:'fadeIn 0.2s ease-out'}}>{renderTab()}</div>
           </div>
           <Toast message={toastMsg} visible={toastVisible} />
-          <nav className="nav-bar flex items-center justify-around px-1 flex-shrink-0" style={{background:'linear-gradient(to top, #0a0f1e, rgba(10,15,30,0.97))', borderTop:'1px solid rgba(255,255,255,0.06)'}}>
+          <nav className="nav-bar flex items-center justify-around px-2 flex-shrink-0" style={{background:'linear-gradient(to top, #0a0f1e, rgba(10,15,30,0.97))', borderTop:'1px solid rgba(255,255,255,0.06)'}}>
             {NAV_ITEMS.map(item => (
-              <button key={item.id} onClick={() => setTab(item.id)} className="flex flex-col items-center gap-0.5 py-2 px-1 transition-all" style={{minWidth:'48px', minHeight:'48px'}} aria-label={item.label}>
+              <button key={item.id} onClick={() => setTab(item.id)} className="flex flex-col items-center gap-1 py-2 px-2 transition-all" style={{minWidth:'54px', minHeight:'52px'}} aria-label={item.label}>
                 <NavIcon path={item.icon} active={tab === item.id} />
-                <span className="font-display font-semibold" style={{color:tab===item.id?'#fbbf24':'#f1f5f9', opacity:tab===item.id?1:0.3, transition:'all 0.2s', fontSize:'0.55rem', letterSpacing:'0.04em'}}>{item.label}</span>
+                <span className="font-display font-semibold" style={{color:tab===item.id?'#fbbf24':'#f1f5f9', opacity:tab===item.id?1:0.35, transition:'all 0.2s', fontSize:'0.7rem', letterSpacing:'0.03em'}}>{item.label}</span>
               </button>
             ))}
           </nav>
