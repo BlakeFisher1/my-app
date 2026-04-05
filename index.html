@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#0a0f1e" />
+  <meta name="description" content="Blake's personal confidence command center" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Command" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <title>Blake's Command Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: { 900: '#0a0f1e', 800: '#111827', 700: '#1a2236', 600: '#1e293b' },
+            amber: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' },
+            warm: { 50: '#fefce8', 100: '#f1f5f9', 200: '#e2e8f0' }
+          },
+          fontFamily: {
+            display: ['Sora', 'sans-serif'],
+            body: ['DM Sans', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body, #root { height: 100%; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: #0a0f1e; color: #f1f5f9; line-height: 1.7; letter-spacing: 0.01em; overflow: hidden; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 20px rgba(245,158,11,0.15); } 50% { box-shadow: 0 0 35px rgba(245,158,11,0.3); } }
+    @keyframes breathe-expand { 0% { transform: scale(0.5); opacity: 0.5; } 50% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.5); opacity: 0.5; } }
+    @keyframes toast-in { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes toast-out { from { opacity: 1; } to { opacity: 0; transform: translateY(-10px); } }
+    @keyframes lockin-pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+
+    .fade-in-up { animation: fadeInUp 0.5s ease-out both; }
+    .fade-in { animation: fadeIn 0.4s ease-out both; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+    .lockin-pulse { animation: lockin-pulse 1.5s ease-in-out infinite; }
+
+    .breathing-circle { width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, rgba(251,191,36,0.4), rgba(251,191,36,0.05)); border: 2px solid rgba(251,191,36,0.4); }
+    .breathing-circle.active { animation: breathe-expand 8s ease-in-out infinite; }
+
+    .box-breath-square { width: 120px; height: 120px; border: 3px solid #fbbf24; border-radius: 12px; position: relative; }
+    .box-breath-dot { width: 14px; height: 14px; border-radius: 50%; background: #fbbf24; position: absolute; box-shadow: 0 0 12px rgba(251,191,36,0.6); }
+
+    .section-scroll { height: calc(100vh - 64px); overflow-y: auto; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+    .nav-bar { height: 64px; }
+
+    .card { background: linear-gradient(135deg, #1a2236, #111827); border: 1px solid rgba(251,191,36,0.08); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .card:hover { border-color: rgba(251,191,36,0.15); }
+
+    .btn-primary { background: linear-gradient(135deg, #d97706, #f59e0b); color: #0a0f1e; font-weight: 700; border: none; border-radius: 12px; padding: 14px 28px; font-size: 1rem; cursor: pointer; transition: all 0.2s; min-height: 48px; font-family: 'Sora', sans-serif; }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(245,158,11,0.3); }
+    .btn-primary:active { transform: scale(0.97); }
+
+    .btn-secondary { background: rgba(251,191,36,0.1); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); border-radius: 12px; padding: 12px 24px; font-weight: 600; cursor: pointer; transition: all 0.2s; min-height: 48px; font-family: 'Sora', sans-serif; }
+    .btn-secondary:hover { background: rgba(251,191,36,0.18); }
+
+    .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 16px; color: #f1f5f9; font-size: 1rem; width: 100%; font-family: 'DM Sans', sans-serif; line-height: 1.6; letter-spacing: 0.01em; min-height: 48px; }
+    .input-field:focus { outline: none; border-color: rgba(251,191,36,0.4); box-shadow: 0 0 0 3px rgba(251,191,36,0.1); }
+    .input-field::placeholder { color: rgba(241,245,249,0.3); }
+
+    .overlay-enter { animation: fadeIn 0.3s ease-out both; }
+
+    .toast { animation: toast-in 0.3s ease-out both; position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); z-index: 60; }
+    .toast-exit { animation: toast-out 0.3s ease-out both; }
+
+    @media (min-width: 640px) {
+      .section-scroll { max-width: 480px; margin: 0 auto; }
+    }
+    @supports (padding-top: env(safe-area-inset-top)) {
+      .section-scroll { padding-top: calc(24px + env(safe-area-inset-top)); }
+      .nav-bar { padding-bottom: env(safe-area-inset-bottom); height: calc(64px + env(safe-area-inset-bottom)); }
+    }
+  </style>
+  <script>
+    (function generateIcons() {
+      function drawIcon(ctx, size) {
+        var r = size * 0.18;
+        ctx.beginPath();
+        ctx.moveTo(r, 0); ctx.lineTo(size - r, 0); ctx.quadraticCurveTo(size, 0, size, r);
+        ctx.lineTo(size, size - r); ctx.quadraticCurveTo(size, size, size - r, size);
+        ctx.lineTo(r, size); ctx.quadraticCurveTo(0, size, 0, size - r);
+        ctx.lineTo(0, r); ctx.quadraticCurveTo(0, 0, r, 0);
+        ctx.closePath(); ctx.fillStyle = '#0a0f1e'; ctx.fill();
+        var cx = size/2, cy = size*0.42, sw = size*0.5, sh = size*0.55;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - sh*0.45);
+        ctx.quadraticCurveTo(cx - sw*0.5, cy - sh*0.3, cx - sw*0.5, cy);
+        ctx.quadraticCurveTo(cx - sw*0.5, cy + sh*0.55, cx, cy + sh*0.55);
+        ctx.quadraticCurveTo(cx + sw*0.5, cy + sh*0.55, cx + sw*0.5, cy);
+        ctx.quadraticCurveTo(cx + sw*0.5, cy - sh*0.3, cx, cy - sh*0.45);
+        ctx.closePath();
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = size*0.04; ctx.stroke();
+        ctx.fillStyle = 'rgba(251,191,36,0.12)'; ctx.fill();
+        ctx.font = 'bold ' + (size*0.3) + 'px sans-serif';
+        ctx.fillStyle = '#fbbf24'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('B', cx, cy + size*0.04);
+      }
+      function makeCanvas(size) { var c = document.createElement('canvas'); c.width = size; c.height = size; drawIcon(c.getContext('2d'), size); return c; }
+      var link = document.createElement('link');
+      link.rel = 'apple-touch-icon'; link.href = makeCanvas(180).toDataURL('image/png');
+      document.head.appendChild(link);
+      if ('caches' in window) {
+        caches.open('blake-command-v1').then(function(cache) {
+          [192, 512].forEach(function(s) {
+            makeCanvas(s).toBlob(function(b) {
+              if (b) cache.put(new Request('/icon-'+s+'.png'), new Response(b, { headers: {'Content-Type':'image/png'} }));
+            }, 'image/png');
+          });
+        });
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel" data-type="module">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    // ── Utility ──
+    function load(key, fallback) {
+      try { const d = localStorage.getItem(key); return d ? JSON.parse(d) : fallback; } catch { return fallback; }
+    }
+    function save(key, data) {
+      try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
+    }
+    function todayStr() { return new Date().toISOString().slice(0, 10); }
+    function dateFmt() { return new Date().toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' }); }
+
+    // ── Data ──
+    const CORE_AFFIRMATIONS = [
+      "You passed all three FINRA exams on the first try. Most people can't do that.",
+      "You called your boss and was outgoing and nothing bad happened to me.",
+      "You left comfortable jobs to bet on yourself at Merrill Lynch.",
+      "You built RateScope \u2014 a real fintech platform \u2014 from scratch.",
+      "You've walked into branches, talked to customers, and nothing bad happened.",
+      "You survived every single bad day you've ever had. You're still here.",
+      "The 31-34% combined pass probability? You beat it."
+    ];
+
+    const DEFAULT_WALL = [
+      "You walked into the branch on your first day. Nothing bad happened.",
+      "You answered a question wrong once. Nobody cared. Nothing bad happened.",
+      "You made small talk with a coworker. Nothing bad happened.",
+      "You spoke up in a meeting. Nothing bad happened.",
+      "You asked for help. Nothing bad happened.",
+      "You were quiet for a bit. Nobody noticed. Nothing bad happened.",
+      "You stumbled over your words. The conversation kept going. Nothing bad happened."
+    ];
+
+    const COURTROOM_STEPS = [
+      { duration: 15, text: "Pause. Name what the courtroom is saying right now.", sub: "Don't fight it. Just notice it." },
+      { duration: 20, text: "Now ask: is that a fact or a feeling?", sub: "Feelings are loud. Facts are quiet. Which one is talking?" },
+      { duration: 15, text: "Nothing bad happened last time. Nothing bad is happening now.", sub: "Your track record of surviving bad days is 100%." },
+      { duration: 10, text: "The courtroom is closed. You're just Blake.", sub: "Go do your thing." }
+    ];
+
+    const PREGAME_SITUATIONS = [
+      {
+        id: 'branch', label: 'Walking Into the Branch', emoji: '\uD83C\uDFE2',
+        remind: "You've done this hundreds of times. You walk in, you say hey, you start your day. Nobody is waiting to judge you at the door.",
+        anchor: "Last time you walked into the branch, nothing bad happened.",
+        lockin: "You belong here. Walk in like you own it."
+      },
+      {
+        id: 'coldcall', label: 'Cold Calling', emoji: '\uD83D\uDCDE',
+        remind: "It's a phone call. They can't see you sweat. Most won't even answer. The ones who do are just people having a regular day.",
+        anchor: "Last time you made a cold call, nothing bad happened.",
+        lockin: "Dial the number. The hardest part is the first second."
+      },
+      {
+        id: 'customer', label: 'Talking to a Customer', emoji: '\uD83E\uDD1D',
+        remind: "You passed 3 FINRA exams. You know your stuff better than you think. They came to you because they need help \u2014 not to test you.",
+        anchor: "Last time you talked to a customer, nothing bad happened.",
+        lockin: "You're the expert in this conversation. Go help them."
+      },
+      {
+        id: 'selling', label: 'Selling a Product', emoji: '\uD83D\uDCBC',
+        remind: "You built RateScope from scratch. You understand products at a level most people never will. You're not faking anything.",
+        anchor: "Last time you pitched something, nothing bad happened.",
+        lockin: "You know this product. Share it like you're helping a friend."
+      },
+      {
+        id: 'meeting', label: 'Speaking Up in a Meeting', emoji: '\uD83D\uDDE3\uFE0F',
+        remind: "Your opinion has value. You earned your seat at that table. Nobody is judging you as hard as you're judging yourself.",
+        anchor: "Last time you spoke up in a meeting, nothing bad happened.",
+        lockin: "Say what you're thinking. It's worth hearing."
+      },
+      {
+        id: 'smalltalk', label: 'Making Small Talk', emoji: '\uD83D\uDCAC',
+        remind: "Small talk is not a performance review. Nobody is keeping score. Just say something and let it breathe.",
+        anchor: "Last time you made small talk, nothing bad happened.",
+        lockin: "Just say hey. The rest takes care of itself."
+      },
+      {
+        id: 'public', label: 'Being in Public', emoji: '\uD83C\uDF06',
+        remind: "Nobody is watching you as closely as you think they are. Everyone out there is worried about their own stuff. You're just another person in the room.",
+        anchor: "Last time you were out in public, nothing bad happened.",
+        lockin: "You're just Blake, out in the world. That's all this is."
+      }
+    ];
+
+    const QUICK_WIN_BUTTONS = [
+      { id: 'call', label: 'Made a cold call', emoji: '\uD83D\uDCDE', wall: 'You made a cold call' },
+      { id: 'customer', label: 'Talked to a customer', emoji: '\uD83E\uDD1D', wall: 'You talked to a customer' },
+      { id: 'branch', label: 'Walked into the branch', emoji: '\uD83C\uDFE2', wall: 'You walked into the branch' },
+      { id: 'helped', label: 'Helped someone', emoji: '\uD83E\uDE7A', wall: 'You helped someone' },
+      { id: 'spoke', label: 'Spoke up', emoji: '\uD83D\uDDE3\uFE0F', wall: 'You spoke up' },
+      { id: 'smalltalk', label: 'Made small talk', emoji: '\uD83D\uDCAC', wall: 'You made small talk with someone' },
+      { id: 'sold', label: 'Sold a product', emoji: '\uD83D\uDCBC', wall: 'You sold a product' },
+      { id: 'public', label: 'Went out in public', emoji: '\uD83C\uDF06', wall: 'You went out in public' },
+      { id: 'meeting', label: 'Got through a meeting', emoji: '\uD83D\uDCC5', wall: 'You got through a meeting' },
+      { id: 'newperson', label: 'Talked to someone new', emoji: '\u2728', wall: 'You talked to someone new' }
+    ];
+
+    // ── Streak logic ──
+    function getStreak(receipts) {
+      if (!receipts.length) return 0;
+      const dates = [...new Set(receipts.map(r => r.dateKey))].sort().reverse();
+      const today = todayStr();
+      if (dates[0] !== today) {
+        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+        if (dates[0] !== yesterday.toISOString().slice(0,10)) return 0;
+      }
+      let streak = 1;
+      for (let i = 0; i < dates.length - 1; i++) {
+        const curr = new Date(dates[i] + 'T00:00:00');
+        const prev = new Date(dates[i+1] + 'T00:00:00');
+        const diff = (curr - prev) / (1000*60*60*24);
+        if (diff === 1) streak++;
+        else break;
+      }
+      return streak;
+    }
+
+    // ── Toast component ──
+    function Toast({ message, visible }) {
+      if (!message) return null;
+      return (
+        <div className={`toast ${visible ? '' : 'toast-exit'}`}>
+          <div className="px-5 py-3 rounded-2xl font-display font-bold text-sm" style={{background:'linear-gradient(135deg, #d97706, #f59e0b)', color:'#0a0f1e'}}>
+            {message}
+          </div>
+        </div>
+      );
+    }
+
+    // ── Nav ──
+    const NAV_ITEMS = [
+      { id: 'armor', label: 'Armor', icon: 'M12 3l-1.912 5.813a2 2 0 01-1.275 1.275L3 12l5.813 1.912a2 2 0 011.275 1.275L12 21l1.912-5.813a2 2 0 011.275-1.275L21 12l-5.813-1.912a2 2 0 01-1.275-1.275L12 3z' },
+      { id: 'pregame', label: 'Pre-Game', icon: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664zM21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+      { id: 'wins', label: 'Wins', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
+      { id: 'court', label: 'Court', icon: 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728A9 9 0 015.636 5.636' },
+      { id: 'wall', label: 'Wall', icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' },
+      { id: 'toolkit', label: 'Calm', icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z' }
+    ];
+
+    // ── Morning Armor (receipts now feed in) ──
+    function MorningArmor({ receipts }) {
+      const [displayed, setDisplayed] = useState([]);
+      const [animKey, setAnimKey] = useState(0);
+      const streak = getStreak(receipts);
+
+      const allArmor = [...CORE_AFFIRMATIONS, ...receipts.slice(0, 50).map(r => r.text)];
+
+      const shuffle = useCallback(() => {
+        const shuffled = [...allArmor].sort(() => Math.random() - 0.5);
+        setDisplayed(shuffled.slice(0, 4));
+        setAnimKey(k => k + 1);
+      }, [receipts.length]);
+
+      useEffect(() => { shuffle(); }, []);
+
+      return (
+        <div className="section-scroll px-5 pt-6 pb-8">
+          <div className="fade-in-up">
+            <p className="text-amber-400 font-display font-semibold text-sm tracking-widest uppercase mb-2">Morning Armor</p>
+            <h1 className="font-display font-extrabold text-3xl leading-tight mb-1" style={{color:'#fefce8'}}>Your Receipts</h1>
+            <p className="text-warm-200 opacity-60 text-base mb-3">Evidence you can't argue with.</p>
+
+            {streak > 0 && (
+              <div className="flex items-center gap-2 mb-6 fade-in-up delay-1">
+                <div className="px-4 py-2 rounded-xl flex items-center gap-2" style={{background:'rgba(251,191,36,0.1)', border:'1px solid rgba(251,191,36,0.2)'}}>
+                  <span className="text-lg">\uD83D\uDD25</span>
+                  <span className="font-display font-bold text-amber-400 text-base">{streak} day streak</span>
+                </div>
+                {receipts.length > 0 && (
+                  <span className="font-body text-warm-200 opacity-40 text-sm">{receipts.length} total receipts</span>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div key={animKey} className="space-y-4 mb-8">
+            {displayed.map((a, i) => (
+              <div key={i} className="card pulse-glow fade-in-up" style={{animationDelay:`${(i+1)*0.12}s`}}>
+                <p className="font-display font-bold text-lg leading-relaxed" style={{color:'#fefce8', letterSpacing:'0.01em'}}>{a}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex justify-center fade-in-up delay-4">
+            <button onClick={shuffle} className="btn-primary flex items-center gap-2">
+              <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 4v5h5M20 20v-5h-5" strokeLinecap="round" strokeLinejoin="round"/><path d="M20.49 9A9 9 0 005.64 5.64L4 4m16 16l-1.64-1.64A9 9 0 014.51 15" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              Shuffle
+            </button>
+          </div>
+
+          <div className="mt-10 text-center fade-in-up delay-4">
+            <p className="text-warm-200 opacity-40 text-sm font-body">These aren't affirmations. These are facts.</p>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Pre-Game Plays ──
+    function PreGame({ receipts }) {
+      const [selected, setSelected] = useState(null);
+      const [lockedIn, setLockedIn] = useState(false);
+
+      function lockIn() {
+        setLockedIn(true);
+        setTimeout(() => { setLockedIn(false); setSelected(null); }, 3000);
+      }
+
+      const sit = selected ? PREGAME_SITUATIONS.find(s => s.id === selected) : null;
+
+      // Find a relevant receipt for this situation
+      function getRelevantReceipt(sitId) {
+        const keywords = {
+          branch: ['branch','walk','office','morning'],
+          coldcall: ['call','cold','dial','phone'],
+          customer: ['customer','client','talk','helped'],
+          selling: ['sold','sell','product','pitch','close'],
+          meeting: ['meeting','spoke','present'],
+          smalltalk: ['small talk','chat','coworker','colleague'],
+          public: ['public','out','store','restaurant','gym']
+        };
+        const words = keywords[sitId] || [];
+        const match = receipts.find(r => words.some(w => r.text.toLowerCase().includes(w)));
+        return match ? match.text : null;
+      }
+
+      // Full-screen lock-in overlay
+      if (lockedIn && sit) {
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-8 overlay-enter" style={{background:'rgba(10,15,30,0.97)'}}>
+            <div className="text-center max-w-md lockin-pulse">
+              <p className="text-6xl mb-6">{sit.emoji}</p>
+              <p className="font-display font-extrabold text-2xl leading-relaxed mb-4" style={{color:'#fbbf24'}}>
+                Locked In.
+              </p>
+              <p className="font-body text-lg leading-relaxed" style={{color:'#f1f5f9', opacity:0.85}}>
+                {sit.lockin}
+              </p>
+            </div>
+          </div>
+        );
+      }
+
+      // Expanded situation view
+      if (sit) {
+        const relevant = getRelevantReceipt(sit.id);
+        return (
+          <div className="section-scroll px-5 pt-6 pb-8">
+            <button onClick={() => setSelected(null)} className="flex items-center gap-2 text-amber-400 font-display font-semibold text-sm mb-6">
+              <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              Back
+            </button>
+
+            <div className="text-center mb-6 fade-in-up">
+              <p className="text-5xl mb-3">{sit.emoji}</p>
+              <h1 className="font-display font-extrabold text-2xl leading-tight" style={{color:'#fefce8'}}>{sit.label}</h1>
+            </div>
+
+            <div className="card fade-in-up delay-1">
+              <p className="text-amber-400 font-display font-semibold text-xs tracking-widest uppercase mb-2">Remember</p>
+              <p className="font-body text-base leading-relaxed" style={{color:'#fefce8'}}>{sit.remind}</p>
+            </div>
+
+            {relevant && (
+              <div className="card fade-in-up delay-2" style={{border:'1px solid rgba(251,191,36,0.2)'}}>
+                <p className="text-amber-400 font-display font-semibold text-xs tracking-widest uppercase mb-2">Your proof</p>
+                <p className="font-display font-bold text-base leading-relaxed" style={{color:'#fefce8'}}>"{relevant}"</p>
+              </div>
+            )}
+
+            <div className="card fade-in-up delay-3">
+              <p className="font-body text-base leading-relaxed" style={{color:'#f1f5f9', opacity:0.8}}>{sit.anchor}</p>
+            </div>
+
+            <div className="flex justify-center mt-4 fade-in-up delay-4">
+              <button onClick={lockIn} className="btn-primary text-xl px-10 py-5 font-display" style={{fontSize:'1.15rem'}}>
+                Lock In
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      // Situation selection grid
+      return (
+        <div className="section-scroll px-5 pt-6 pb-8">
+          <div className="fade-in-up">
+            <p className="text-amber-400 font-display font-semibold text-sm tracking-widest uppercase mb-2">Pre-Game</p>
+            <h1 className="font-display font-extrabold text-3xl leading-tight mb-1" style={{color:'#fefce8'}}>Lock In</h1>
+            <p className="text-warm-200 opacity-60 text-base mb-8">Pick what you're about to do. Get your head right first.</p>
+          </div>
+
+          <div className="space-y-3">
+            {PREGAME_SITUATIONS.map((sit, i) => (
+              <button
+                key={sit.id}
+                onClick={() => setSelected(sit.id)}
+                className="card w-full text-left flex items-center gap-4 fade-in-up"
+                style={{animationDelay:`${i*0.06}s`, cursor:'pointer', marginBottom:'12px'}}
+              >
+                <span className="text-3xl flex-shrink-0">{sit.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="font-display font-bold text-base" style={{color:'#fefce8'}}>{sit.label}</p>
+                  <p className="font-body text-sm text-warm-200 opacity-50 truncate">{sit.remind.slice(0, 60)}...</p>
+                </div>
+                <svg width="20" height="20" fill="none" stroke="rgba(251,191,36,0.4)" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // ── Quick Wins + Receipt Log (combined) ──
+    function WinsAndReceipts({ receipts, setReceipts, wallCustom, setWallCustom, showToast }) {
+      const [input, setInput] = useState('');
+      const [deleteId, setDeleteId] = useState(null);
+      const todayWins = receipts.filter(r => r.dateKey === todayStr());
+
+      function addReceipt(text, isQuickWin) {
+        const entry = { id: Date.now(), text, date: dateFmt(), dateKey: todayStr(), quickWin: !!isQuickWin };
+        setReceipts(prev => [entry, ...prev]);
+        return entry;
+      }
+
+      function quickWin(btn) {
+        addReceipt(btn.label, true);
+        // Also add to the Wall
+        const wallText = btn.wall + '. Nothing bad happened.';
+        setWallCustom(prev => [...prev, { id: Date.now(), text: wallText }]);
+        showToast('+1 receipt \u2014 ' + btn.label);
+      }
+
+      function addManual() {
+        const text = input.trim();
+        if (!text) return;
+        addReceipt(text, false);
+        setInput('');
+        showToast('+1 receipt logged');
+      }
+
+      function handleKeyDown(e) { if (e.key === 'Enter') addManual(); }
+      function doDelete() { setReceipts(prev => prev.filter(e => e.id !== deleteId)); setDeleteId(null); }
+
+      return (
+        <div className="section-scroll px-5 pt-6 pb-8">
+          <div className="fade-in-up">
+            <p className="text-amber-400 font-display font-semibold text-sm tracking-widest uppercase mb-2">Wins</p>
+            <h1 className="font-display font-extrabold text-3xl leading-tight mb-1" style={{color:'#fefce8'}}>Stack Your Proof</h1>
+            <p className="text-warm-200 opacity-60 text-base mb-2">Every tap is evidence the courtroom can't touch.</p>
+            <div className="flex items-center gap-3 mb-6">
+              <span className="font-display font-bold text-amber-400 text-lg">{receipts.length} receipt{receipts.length !== 1 ? 's' : ''} total</span>
+              {todayWins.length > 0 && (
+                <span className="px-3 py-1 rounded-lg text-xs font-display font-semibold" style={{background:'rgba(251,191,36,0.12)', color:'#fbbf24'}}>
+                  {todayWins.length} today
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Win buttons */}
+          <div className="fade-in-up delay-1 mb-6">
+            <p className="text-amber-400 font-display font-semibold text-xs tracking-widest uppercase mb-3">Quick Win \u2014 one tap</p>
+            <div className="flex flex-wrap gap-2">
+              {QUICK_WIN_BUTTONS.map(btn => (
+                <button
+                  key={btn.id}
+                  onClick={() => quickWin(btn)}
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl font-body text-sm font-medium transition-all active:scale-95"
+                  style={{background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', color:'#f1f5f9', minHeight:'44px'}}
+                >
+                  <span>{btn.emoji}</span>
+                  <span>{btn.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Manual entry */}
+          <div className="fade-in-up delay-2 mb-6">
+            <p className="text-amber-400 font-display font-semibold text-xs tracking-widest uppercase mb-3">Or type your own</p>
+            <div className="flex gap-3">
+              <input className="input-field flex-1" placeholder="What did you do today?" value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown} maxLength={200} />
+              <button onClick={addManual} className="btn-primary px-5 whitespace-nowrap" disabled={!input.trim()}>Save</button>
+            </div>
+          </div>
+
+          {/* Receipt list */}
+          <div className="space-y-3">
+            {receipts.map((entry, i) => (
+              <div key={entry.id} className="card fade-in-up flex items-start justify-between gap-3" style={{animationDelay:`${Math.min(i,5)*0.06}s`, padding:'16px 20px'}}>
+                <div className="flex-1 min-w-0">
+                  <p className="font-body text-base leading-relaxed" style={{color:'#fefce8'}}>{entry.text}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-warm-200 opacity-40 text-xs">{entry.date}</p>
+                    {entry.quickWin && <span className="text-xs px-2 py-0.5 rounded-md font-display font-semibold" style={{background:'rgba(251,191,36,0.1)', color:'rgba(251,191,36,0.6)', fontSize:'0.6rem'}}>QUICK WIN</span>}
+                  </div>
+                </div>
+                <button onClick={() => setDeleteId(entry.id)} className="text-warm-200 opacity-30 hover:opacity-70 transition-opacity p-1 flex-shrink-0" style={{minWidth:'32px',minHeight:'32px',display:'flex',alignItems:'center',justifyContent:'center'}} aria-label="Delete">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {receipts.length === 0 && (
+            <div className="text-center mt-12 fade-in">
+              <p className="text-warm-200 opacity-30 text-base">No receipts yet. Tap a quick win or type your own.</p>
+            </div>
+          )}
+
+          {deleteId !== null && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center px-6 overlay-enter" style={{background:'rgba(10,15,30,0.85)'}}>
+              <div className="card text-center max-w-sm w-full" style={{border:'1px solid rgba(251,191,36,0.2)'}}>
+                <p className="font-display font-bold text-lg mb-4" style={{color:'#fefce8'}}>Delete this receipt?</p>
+                <div className="flex gap-3 justify-center">
+                  <button onClick={() => setDeleteId(null)} className="btn-secondary px-6">Keep it</button>
+                  <button onClick={doDelete} className="btn-primary px-6">Delete</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ── Courtroom Closer ──
+    function CourtroomCloser() {
+      const [active, setActive] = useState(false);
+      const [stepIndex, setStepIndex] = useState(0);
+      const [elapsed, setElapsed] = useState(0);
+      const timerRef = useRef(null);
+      const totalDuration = COURTROOM_STEPS.reduce((s, c) => s + c.duration, 0);
+
+      function start() { setActive(true); setStepIndex(0); setElapsed(0); }
+      function stop() { setActive(false); setStepIndex(0); setElapsed(0); if (timerRef.current) clearInterval(timerRef.current); }
+
+      useEffect(() => {
+        if (!active) return;
+        timerRef.current = setInterval(() => {
+          setElapsed(prev => { const next = prev + 1; if (next >= totalDuration) { stop(); return 0; } return next; });
+        }, 1000);
+        return () => clearInterval(timerRef.current);
+      }, [active]);
+
+      useEffect(() => {
+        if (!active) return;
+        let cum = 0;
+        for (let i = 0; i < COURTROOM_STEPS.length; i++) {
+          cum += COURTROOM_STEPS[i].duration;
+          if (elapsed < cum) { if (i !== stepIndex) setStepIndex(i); return; }
+        }
+      }, [elapsed, active]);
+
+      const step = COURTROOM_STEPS[stepIndex];
+      const progress = (elapsed / totalDuration) * 100;
+
+      return (
+        <div className="section-scroll px-5 pt-6 pb-8">
+          <div className="fade-in-up">
+            <p className="text-amber-400 font-display font-semibold text-sm tracking-widest uppercase mb-2">Courtroom Closer</p>
+            <h1 className="font-display font-extrabold text-3xl leading-tight mb-1" style={{color:'#fefce8'}}>Shut It Down</h1>
+            <p className="text-warm-200 opacity-60 text-base mb-8">60 seconds to close the courtroom.</p>
+          </div>
+          {!active ? (
+            <div className="fade-in flex flex-col items-center mt-8">
+              <div className="breathing-circle mb-8 opacity-40"></div>
+              <button onClick={start} className="btn-primary text-xl px-10 py-5 font-display" style={{fontSize:'1.15rem'}}>Close the Courtroom</button>
+              <p className="text-warm-200 opacity-40 text-sm mt-6 text-center max-w-xs">When the courtroom starts talking, hit this button. One minute. That's all it takes.</p>
+            </div>
+          ) : (
+            <div className="fade-in flex flex-col items-center">
+              <div className="breathing-circle active mb-6"></div>
+              <div className="text-center mb-6" key={stepIndex}>
+                <p className="text-amber-400 font-display font-semibold text-xs tracking-widest uppercase mb-3 fade-in">Step {stepIndex+1} of {COURTROOM_STEPS.length}</p>
+                <p className="font-display font-bold text-xl leading-relaxed mb-3 fade-in-up" style={{color:'#fefce8', maxWidth:'320px'}}>{step.text}</p>
+                <p className="text-warm-200 opacity-50 text-base fade-in delay-1">{step.sub}</p>
+              </div>
+              <div className="w-full max-w-xs mb-6">
+                <div className="h-1.5 rounded-full overflow-hidden" style={{background:'rgba(255,255,255,0.08)'}}>
+                  <div className="h-full rounded-full transition-all duration-1000 ease-linear" style={{width:`${progress}%`, background:'linear-gradient(90deg, #d97706, #fbbf24)'}}></div>
+                </div>
+                <p className="text-center text-warm-200 opacity-40 text-xs mt-2">{totalDuration - elapsed}s remaining</p>
+              </div>
+              <button onClick={stop} className="btn-secondary text-sm">Cancel</button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ── Nothing Bad Happened Wall ──
+    function NothingBadHappened({ wallCustom, setWallCustom }) {
+      const [input, setInput] = useState('');
+      const allItems = [...DEFAULT_WALL, ...wallCustom.map(c => c.text)];
+
+      function addEntry() {
+        let text = input.trim();
+        if (!text) return;
+        if (!text.endsWith('Nothing bad happened.')) text = text.replace(/\.?\s*$/, '. Nothing bad happened.');
+        setWallCustom(prev => [...prev, { id: Date.now(), text }]);
+        setInput('');
+      }
+      function handleKeyDown(e) { if (e.key === 'Enter') addEntry(); }
+
+      return (
+        <div className="section-scroll px-5 pt-6 pb-8">
+          <div className="fade-in-up">
+            <p className="text-amber-400 font-display font-semibold text-sm tracking-widest uppercase mb-2">The Wall</p>
+            <h1 className="font-display font-extrabold text-3xl leading-tight mb-1" style={{color:'#fefce8'}}>Nothing Bad Happened</h1>
+            <p className="text-warm-200 opacity-60 text-base mb-2">Every feared outcome that never showed up.</p>
+            <p className="font-display font-bold text-amber-400 text-base mb-6">{allItems.length} entries of proof</p>
+          </div>
+          <div className="space-y-3 mb-8">
+            {allItems.map((item, i) => (
+              <div key={i} className="card fade-in-up" style={{animationDelay:`${Math.min(i,8)*0.05}s`}}>
+                <p className="font-body text-base leading-relaxed" style={{color:'#fefce8'}}>{item}</p>
+              </div>
+            ))}
+          </div>
+          <div className="fade-in-up sticky bottom-0 pb-2 pt-4" style={{background:'linear-gradient(transparent, #0a0f1e 20%)'}}>
+            <p className="text-amber-400 font-display font-semibold text-xs tracking-widest uppercase mb-3">Add your own</p>
+            <div className="flex gap-3">
+              <input className="input-field flex-1" placeholder="You did something scary..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown} maxLength={200} />
+              <button onClick={addEntry} className="btn-primary px-5 whitespace-nowrap" disabled={!input.trim()}>Add</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Box Breathing ──
+    function BoxBreathing() {
+      const [active, setActive] = useState(false);
+      const [phase, setPhase] = useState(0);
+      const [seconds, setSeconds] = useState(0);
+      const timerRef = useRef(null);
+      const phaseLabels = ['Breathe In', 'Hold', 'Breathe Out', 'Hold'];
+      const DUR = 4;
+
+      function toggle() {
+        if (active) { clearInterval(timerRef.current); setActive(false); setPhase(0); setSeconds(0); }
+        else { setActive(true); setPhase(0); setSeconds(0); }
+      }
+      useEffect(() => {
+        if (!active) return;
+        timerRef.current = setInterval(() => {
+          setSeconds(prev => { const n = prev+1; if (n >= DUR) { setPhase(p => (p+1)%4); return 0; } return n; });
+        }, 1000);
+        return () => clearInterval(timerRef.current);
+      }, [active]);
+
+      const prog = seconds / DUR;
+      let dotX, dotY;
+      if (phase === 0) { dotX = prog*100; dotY = 0; }
+      else if (phase === 1) { dotX = 100; dotY = prog*100; }
+      else if (phase === 2) { dotX = 100-prog*100; dotY = 100; }
+      else { dotX = 0; dotY = 100-prog*100; }
+
+      return (
+        <div className="card flex flex-col items-center py-6">
+          <p className="font-display font-bold text-base mb-4" style={{color:'#fefce8'}}>Box Breathing</p>
+          <div className="box-breath-square mb-4" style={{opacity: active ? 1 : 0.4, transition:'opacity 0.3s'}}>
+            {active && <div className="box-breath-dot" style={{left:`calc(${dotX}% - 7px)`, top:`calc(${dotY}% - 7px)`, transition:`left ${DUR}s linear, top ${DUR}s linear`}}></div>}
+          </div>
+          {active && <p className="font-display font-semibold text-amber-400 text-base mb-3 fade-in">{phaseLabels[phase]} <span className="opacity-50 text-sm ml-1">{DUR - seconds}s</span></p>}
+          <button onClick={toggle} className={active ? "btn-secondary text-sm" : "btn-primary text-sm"}>{active ? 'Stop' : 'Start'}</button>
+        </div>
+      );
+    }
+
+    // ── 5-4-3-2-1 Grounding ──
+    function Grounding() {
+      const [checked, setChecked] = useState({see:0,hear:0,touch:0,smell:0,taste:0});
+      const cats = [
+        {key:'see',count:5,label:'things you see',emoji:'\uD83D\uDC41'},
+        {key:'hear',count:4,label:'things you hear',emoji:'\uD83D\uDC42'},
+        {key:'touch',count:3,label:'things you touch',emoji:'\u270B'},
+        {key:'smell',count:2,label:'things you smell',emoji:'\uD83D\uDC43'},
+        {key:'taste',count:1,label:'thing you taste',emoji:'\uD83D\uDC45'}
+      ];
+      const total = cats.reduce((s,c) => s+c.count, 0);
+      const done = Object.values(checked).reduce((s,v) => s+v, 0);
+
+      return (
+        <div className="card">
+          <div className="flex items-center justify-between mb-4">
+            <p className="font-display font-bold text-base" style={{color:'#fefce8'}}>5-4-3-2-1 Grounding</p>
+            {done > 0 && <button onClick={() => setChecked({see:0,hear:0,touch:0,smell:0,taste:0})} className="text-amber-400 text-xs font-display font-semibold opacity-60 hover:opacity-100">Reset</button>}
+          </div>
+          <div className="space-y-2">
+            {cats.map(cat => {
+              const d = checked[cat.key]; const ok = d >= cat.count;
+              return (
+                <button key={cat.key} onClick={() => setChecked(p => ({...p,[cat.key]: p[cat.key]<cat.count?p[cat.key]+1:0}))}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl transition-all"
+                  style={{background: ok?'rgba(251,191,36,0.12)':'rgba(255,255,255,0.03)', border:`1px solid ${ok?'rgba(251,191,36,0.25)':'rgba(255,255,255,0.05)'}`, minHeight:'48px'}}>
+                  <span className="text-lg">{cat.emoji}</span>
+                  <span className="font-body text-sm flex-1 text-left" style={{color:ok?'#fbbf24':'#f1f5f9'}}>{cat.count} {cat.label}</span>
+                  <span className="font-display font-bold text-sm" style={{color:ok?'#fbbf24':'rgba(241,245,249,0.3)'}}>{d}/{cat.count}</span>
+                </button>
+              );
+            })}
+          </div>
+          {done >= total && <p className="text-center text-amber-400 font-display font-semibold text-sm mt-4 fade-in">You're here. You're grounded. You're good.</p>}
+          <div className="mt-3 h-1 rounded-full overflow-hidden" style={{background:'rgba(255,255,255,0.06)'}}>
+            <div className="h-full rounded-full transition-all duration-300" style={{width:`${(done/total)*100}%`, background:'linear-gradient(90deg, #d97706, #fbbf24)'}}></div>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Quick Calm Toolkit ──
+    function QuickCalm() {
+      const [showOverlay, setShowOverlay] = useState(false);
+      return (
+        <div className="section-scroll px-5 pt-6 pb-8">
+          <div className="fade-in-up">
+            <p className="text-amber-400 font-display font-semibold text-sm tracking-widest uppercase mb-2">Quick Calm</p>
+            <h1 className="font-display font-extrabold text-3xl leading-tight mb-1" style={{color:'#fefce8'}}>Ground Yourself</h1>
+            <p className="text-warm-200 opacity-60 text-base mb-8">Quick tools for rough moments.</p>
+          </div>
+          <div className="space-y-4 fade-in-up delay-1">
+            <BoxBreathing />
+            <Grounding />
+            <div className="pt-2">
+              <button onClick={() => setShowOverlay(true)} className="w-full py-5 rounded-2xl font-display font-extrabold text-xl transition-all"
+                style={{background:'linear-gradient(135deg, rgba(251,191,36,0.15), rgba(217,119,6,0.1))', border:'2px solid rgba(251,191,36,0.3)', color:'#fbbf24', minHeight:'64px'}}>
+                You are Blake Fisher.
+              </button>
+            </div>
+          </div>
+          {showOverlay && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center px-8 overlay-enter cursor-pointer" style={{background:'rgba(10,15,30,0.95)'}} onClick={() => setShowOverlay(false)}>
+              <div className="text-center max-w-md">
+                <p className="font-display font-extrabold text-2xl leading-relaxed mb-6" style={{color:'#fbbf24'}}>You are not the courtroom.</p>
+                <p className="font-body text-lg leading-relaxed mb-8" style={{color:'#f1f5f9', opacity:0.85}}>You are the person who passed 3 exams, built a platform, bet on himself, and keeps showing up.</p>
+                <p className="font-display font-extrabold text-xl" style={{color:'#fefce8'}}>Close this and go be that guy.</p>
+                <p className="text-warm-200 opacity-30 text-sm mt-10 font-body">Tap anywhere to dismiss</p>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ── Nav Icon ──
+    function NavIcon({ path, active }) {
+      return (
+        <svg width="22" height="22" fill="none" stroke={active?'#fbbf24':'#f1f5f9'} strokeWidth="1.8" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" style={{opacity:active?1:0.35, transition:'all 0.2s'}}>
+          <path d={path} />
+        </svg>
+      );
+    }
+
+    // ── App ──
+    function App() {
+      const [tab, setTab] = useState('armor');
+      const [receipts, setReceipts] = useState(() => load('blake_receipts', []));
+      const [wallCustom, setWallCustom] = useState(() => load('blake_wall', []));
+      const [toastMsg, setToastMsg] = useState('');
+      const [toastVisible, setToastVisible] = useState(false);
+      const toastTimer = useRef(null);
+
+      // Persist
+      useEffect(() => { save('blake_receipts', receipts); }, [receipts]);
+      useEffect(() => { save('blake_wall', wallCustom); }, [wallCustom]);
+
+      function showToast(msg) {
+        setToastMsg(msg); setToastVisible(true);
+        if (toastTimer.current) clearTimeout(toastTimer.current);
+        toastTimer.current = setTimeout(() => { setToastVisible(false); setTimeout(() => setToastMsg(''), 300); }, 1800);
+      }
+
+      const renderTab = () => {
+        switch (tab) {
+          case 'armor': return <MorningArmor receipts={receipts} />;
+          case 'pregame': return <PreGame receipts={receipts} />;
+          case 'wins': return <WinsAndReceipts receipts={receipts} setReceipts={setReceipts} wallCustom={wallCustom} setWallCustom={setWallCustom} showToast={showToast} />;
+          case 'court': return <CourtroomCloser />;
+          case 'wall': return <NothingBadHappened wallCustom={wallCustom} setWallCustom={setWallCustom} />;
+          case 'toolkit': return <QuickCalm />;
+          default: return <MorningArmor receipts={receipts} />;
+        }
+      };
+
+      return (
+        <div className="flex flex-col h-full" style={{background:'#0a0f1e'}}>
+          <div className="flex-1 overflow-hidden" key={tab}>
+            <div style={{animation:'fadeIn 0.2s ease-out'}}>{renderTab()}</div>
+          </div>
+          <Toast message={toastMsg} visible={toastVisible} />
+          <nav className="nav-bar flex items-center justify-around px-1 flex-shrink-0" style={{background:'linear-gradient(to top, #0a0f1e, rgba(10,15,30,0.97))', borderTop:'1px solid rgba(255,255,255,0.06)'}}>
+            {NAV_ITEMS.map(item => (
+              <button key={item.id} onClick={() => setTab(item.id)} className="flex flex-col items-center gap-0.5 py-2 px-1 transition-all" style={{minWidth:'48px', minHeight:'48px'}} aria-label={item.label}>
+                <NavIcon path={item.icon} active={tab === item.id} />
+                <span className="font-display font-semibold" style={{color:tab===item.id?'#fbbf24':'#f1f5f9', opacity:tab===item.id?1:0.3, transition:'all 0.2s', fontSize:'0.55rem', letterSpacing:'0.04em'}}>{item.label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('sw.js').then(function(reg) {
+          console.log('SW registered, scope:', reg.scope);
+        }).catch(function(err) {
+          console.log('SW registration failed:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
